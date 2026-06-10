@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Catskills to Carlsbad — 5-Day Drive · Jun 29 – Jul 3, 2026</title>
+<meta name="description" content="Narrowsburg, NY to Carlsbad, CA in 5 days. Rockies, a drive-up Arches stop, and Zion — no big hikes, big views.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,900;1,9..144,500&family=Oswald:wght@400;500;600;700&family=Spectral:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<style>
+  :root{
+    --sand:#F2E6CE; --sand-deep:#E8D6B3; --cream:#FBF4E4;
+    --rust:#B5481F; --rust-deep:#7C2E18; --ochre:#D89A3F;
+    --sage:#5E7551; --sage-deep:#3F5238; --night:#1C2A36; --night-soft:#26384a;
+    --ink:#2A1D12; --line:rgba(124,46,24,.22); --shadow:0 18px 40px -22px rgba(42,29,18,.55);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{font-family:'Spectral',Georgia,serif;color:var(--ink);background:var(--sand);line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+  body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:.5;
+    background:
+      radial-gradient(circle at 18% 22%, transparent 0 38px, rgba(124,46,24,.05) 38px 39px, transparent 39px 78px, rgba(124,46,24,.05) 78px 79px, transparent 79px 124px, rgba(124,46,24,.045) 124px 125px, transparent 125px),
+      radial-gradient(circle at 82% 78%, transparent 0 44px, rgba(94,117,81,.06) 44px 45px, transparent 45px 92px, rgba(94,117,81,.05) 92px 93px, transparent 93px 148px, rgba(94,117,81,.045) 148px 149px, transparent 149px);}
+  .eyebrow{font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:.3em;font-weight:600;font-size:.72rem;color:var(--rust)}
+  h1,h2,h3{font-family:'Fraunces',serif;line-height:1.04;letter-spacing:-.01em}
+  a{color:inherit}
+
+  nav{position:sticky;top:0;z-index:1000;background:rgba(28,42,54,.96);backdrop-filter:blur(8px);border-bottom:3px solid var(--ochre)}
+  .nav-wrap{max-width:1040px;margin:0 auto;display:flex;align-items:center;gap:.6rem;padding:.6rem 1.2rem;flex-wrap:wrap}
+  .nav-brand{font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:.16em;font-weight:600;font-size:.8rem;color:var(--sand);margin-right:auto;white-space:nowrap}
+  .nav-brand b{color:var(--ochre)}
+  .nav-links{display:flex;gap:.2rem;flex-wrap:wrap}
+  .nav-links a{font-family:'Oswald',sans-serif;font-size:.76rem;font-weight:500;letter-spacing:.05em;color:rgba(242,230,206,.72);text-decoration:none;padding:.3rem .5rem;border-radius:6px;transition:.2s}
+  .nav-links a:hover,.nav-links a.active{color:var(--night);background:var(--ochre)}
+
+  header.hero{position:relative;overflow:hidden;background:linear-gradient(180deg,var(--night) 0%, var(--night-soft) 58%, var(--rust-deep) 130%);color:var(--cream);padding:4.2rem 1.2rem 5.2rem;text-align:center}
+  .hero svg.range{position:absolute;left:0;right:0;bottom:-1px;width:100%;height:210px;display:block}
+  .hero .sun{position:absolute;top:8%;left:50%;transform:translateX(-50%);width:150px;height:150px;border-radius:50%;background:radial-gradient(circle,#F2C46B 0%, #D89A3F 55%, rgba(216,154,63,0) 72%);opacity:.85;filter:blur(2px)}
+  .hero-inner{position:relative;z-index:2;max-width:820px;margin:0 auto}
+  .hero .eyebrow{color:var(--ochre)}
+  .hero h1{font-size:clamp(2.5rem,7vw,4.8rem);font-weight:900;margin:.5rem 0 .25rem;color:var(--cream)}
+  .hero .route{font-family:'Oswald',sans-serif;font-weight:300;text-transform:uppercase;letter-spacing:.14em;font-size:clamp(.82rem,2.3vw,1.1rem);color:var(--sand-deep);margin-bottom:.7rem}
+  .hero .route b{color:var(--ochre);font-weight:600}
+  .hero .datebadge{display:inline-block;font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:.16em;font-size:.74rem;font-weight:500;color:var(--night);background:var(--ochre);padding:.35rem 1rem;border-radius:999px;margin-bottom:1.6rem}
+  .stats{display:flex;justify-content:center;gap:0;flex-wrap:wrap}
+  .stat{padding:.4rem 1.4rem;position:relative}
+  .stat + .stat::before{content:"";position:absolute;left:0;top:18%;bottom:18%;width:1px;background:rgba(242,230,206,.25)}
+  .stat .num{font-family:'Fraunces',serif;font-weight:900;font-size:1.8rem;color:var(--cream);display:block;line-height:1}
+  .stat .lbl{font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:.16em;font-size:.6rem;color:var(--ochre);margin-top:.3rem}
+
+  main{max-width:1040px;margin:0 auto;padding:3.2rem 1.2rem}
+  .intro{max-width:700px;margin:0 auto 2rem;text-align:center}
+  .intro h2{font-size:clamp(1.6rem,4vw,2.4rem);font-weight:600;margin-bottom:.7rem}
+  .intro p{font-size:1.06rem;color:#5b4a39}
+  .arrive{display:inline-flex;align-items:center;gap:.5rem;margin-top:1rem;font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:.1em;font-size:.78rem;font-weight:600;color:var(--sage-deep);background:#eef3e8;border:1px solid rgba(94,117,81,.35);padding:.5rem 1rem;border-radius:999px}
+
+  section.mapsec{margin:2.2rem 0 3rem;scroll-margin-top:80px}
+  .mapsec .sechead{text-align:center;margin-bottom:1.1rem}
+  .mapsec .sechead h3{font-size:clamp(1.5rem,3.6vw,2rem);font-weight:600;margin-top:.2rem}
+  .mapsec .sechead p{color:#6b5946;font-size:.95rem;margin-top:.3rem}
+  .daychips{display:flex;flex-wrap:wrap;gap:.45rem;justify-content:center;margin-bottom:1rem}
+  .chip{font-family:'Oswald',sans-serif;font-size:.72rem;font-weight:600;letter-spacing:.05em;text-transform:uppercase;cursor:pointer;border:none;color:#fff;padding:.4rem .7rem;border-radius:999px;transition:transform .15s,box-shadow .15s;opacity:.92}
+  .chip:hover{transform:translateY(-2px);box-shadow:0 6px 14px -6px rgba(0,0,0,.5);opacity:1}
+  .chip.all{background:var(--night)}
+  #map{height:540px;width:100%;border-radius:18px;border:1px solid var(--line);box-shadow:var(--shadow);z-index:1}
+  .leaflet-popup-content-wrapper{border-radius:12px}
+  .leaflet-popup-content{font-family:'Spectral',serif;margin:.8rem 1rem}
+  .pop-eyebrow{font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:.12em;font-size:.62rem;font-weight:600;margin-bottom:.15rem}
+  .pop-nm{font-family:'Fraunces',serif;font-weight:700;font-size:1.05rem;color:var(--ink);line-height:1.15}
+  .pop-ds{font-size:.86rem;color:#5b4a39;margin-top:.25rem}
+  .pop-bnb{display:inline-block;margin-top:.55rem;font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:.06em;font-size:.68rem;font-weight:600;color:#fff;background:var(--rust);padding:.34rem .7rem;border-radius:999px;text-decoration:none}
+  .pop-bnb:hover{background:var(--rust-deep)}
+  .numpin{display:grid;place-items:center;width:30px;height:30px;border-radius:50% 50% 50% 4px;transform:rotate(45deg);border:2px solid #fff;box-shadow:0 3px 8px -2px rgba(0,0,0,.5);font-family:'Fraunces',serif;font-weight:900;font-size:.95rem;color:#fff}
+  .numpin span{transform:rotate(-45deg)}
+  .springpin{width:26px;height:26px;border-radius:50%;background:#fff;border:2px solid #2E8B7F;box-shadow:0 2px 6px -1px rgba(0,0,0,.45);display:grid;place-items:center;font-size:.9rem;line-height:1}
+  .mapnote{text-align:center;font-size:.8rem;color:#8a7458;margin-top:.7rem;font-style:italic}
+
+  .secdivider{text-align:center;margin:0 auto 1.4rem;scroll-margin-top:80px}
+  .secdivider h3{font-size:clamp(1.5rem,3.8vw,2.1rem);font-weight:600}
+  .toolbar{display:flex;justify-content:center;margin-bottom:1.8rem}
+  .btn{font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:.1em;font-size:.78rem;font-weight:600;cursor:pointer;border:2px solid var(--rust);color:var(--rust);background:transparent;padding:.55rem 1.1rem;border-radius:999px;transition:.2s}
+  .btn:hover{background:var(--rust);color:var(--cream)}
+
+  .days{display:flex;flex-direction:column;gap:1.1rem}
+  .day{background:var(--cream);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);overflow:hidden;scroll-margin-top:80px}
+  .day-head{display:flex;align-items:center;gap:1.05rem;padding:1.1rem 1.3rem;cursor:pointer;border-left:7px solid var(--rust);transition:background .2s}
+  .day-head:hover{background:#fdf8ec}
+  .day.green .day-head{border-left-color:var(--sage)}
+  .daynum{flex:none;width:54px;height:54px;border-radius:12px;display:grid;place-items:center;background:var(--night);color:var(--ochre);font-family:'Fraunces',serif;font-weight:900;font-size:1.5rem;line-height:1}
+  .day.green .daynum{background:var(--sage-deep)}
+  .day-titles{flex:1;min-width:0}
+  .day-titles .seg{font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:.13em;font-size:.66rem;color:var(--rust);font-weight:600}
+  .day.green .day-titles .seg{color:var(--sage-deep)}
+  .day-titles h3{font-size:1.2rem;font-weight:600;margin:.1rem 0}
+  .daydate{font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:.1em;font-size:.68rem;color:#8a7458;font-weight:500}
+  .day-meta{flex:none;text-align:right;font-family:'Oswald',sans-serif;letter-spacing:.04em}
+  .day-meta .mi{font-size:1.05rem;font-weight:600;color:var(--ink)}
+  .day-meta .hr{font-size:.72rem;color:#8a7458;text-transform:uppercase;letter-spacing:.12em}
+  .chev{flex:none;width:24px;height:24px;color:var(--rust);transition:transform .3s;margin-left:.2rem}
+  .day.open .chev{transform:rotate(180deg)}
+  .day-body{max-height:0;overflow:hidden;transition:max-height .5s ease}
+  .day.open .day-body{max-height:1800px}
+  .day-body-inner{padding:0 1.3rem 1.4rem;border-top:1px dashed var(--line)}
+  .drive{font-style:italic;color:#6b5946;margin:1rem 0 1.1rem;font-size:1.02rem}
+  .timing{display:flex;gap:.7rem;align-items:flex-start;background:#eef3e8;border:1px solid rgba(94,117,81,.3);border-radius:10px;padding:.6rem .85rem;margin-bottom:1.1rem;font-size:.93rem;color:#3f5238}
+  .timing b{color:var(--sage-deep)}
+  .timing .ico{flex:none}
+  .block{margin-bottom:1rem}
+  .block-label{font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:.18em;font-size:.68rem;font-weight:600;color:var(--sage-deep);display:flex;align-items:center;gap:.5rem;margin-bottom:.5rem}
+  .block-label::before{content:"";width:18px;height:2px;background:var(--ochre)}
+  .stop{display:flex;gap:.7rem;padding:.55rem 0;border-bottom:1px solid rgba(124,46,24,.08)}
+  .stop:last-child{border-bottom:none}
+  .stop .dot{flex:none;width:9px;height:9px;border-radius:50%;background:var(--rust);margin-top:.55rem}
+  .stop.food .dot{background:var(--ochre)}
+  .stop.view .dot{background:var(--sage)}
+  .stop .txt{flex:1}
+  .stop .nm{font-weight:600;color:var(--ink)}
+  .stop .ds{font-size:.95rem;color:#6b5946}
+  .maplink{flex:none;align-self:center;font-family:'Oswald',sans-serif;font-size:.66rem;text-transform:uppercase;letter-spacing:.08em;text-decoration:none;color:var(--rust);border:1px solid var(--line);padding:.28rem .6rem;border-radius:999px;white-space:nowrap;transition:.2s}
+  .maplink:hover{background:var(--rust);color:var(--cream);border-color:var(--rust)}
+  .flag{background:#fdeccf;border:1px solid var(--ochre);border-radius:10px;padding:.6rem .8rem;font-size:.92rem;color:#7a5a1e;margin-top:.4rem}
+  .flag b{color:var(--rust-deep)}
+  .nohike{display:inline-block;font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:.08em;font-size:.58rem;font-weight:600;color:var(--sage-deep);background:#e4eedd;border:1px solid rgba(94,117,81,.4);padding:.12rem .45rem;border-radius:5px;margin-left:.4rem;vertical-align:middle}
+
+  /* LODGING */
+  section.stay{margin-top:3.4rem;scroll-margin-top:80px}
+  .stay .sechead{text-align:center;margin-bottom:1.4rem}
+  .stay .sechead h3{font-size:clamp(1.5rem,3.8vw,2.1rem);font-weight:600;margin-top:.2rem}
+  .stay .sechead p{color:#6b5946;font-size:.95rem;margin-top:.4rem;max-width:620px;margin-left:auto;margin-right:auto}
+  .staygrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:1rem}
+  .staycard{background:var(--cream);border:1px solid var(--line);border-radius:14px;padding:1.1rem 1.2rem;display:flex;flex-direction:column}
+  .staycard .nht{font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:.12em;font-size:.64rem;font-weight:600;color:var(--rust)}
+  .staycard h4{font-family:'Fraunces',serif;font-weight:700;font-size:1.15rem;margin:.15rem 0 .4rem}
+  .staycard p{font-size:.9rem;color:#5b4a39;flex:1}
+  .staycard .priority{font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:.08em;font-size:.6rem;font-weight:600;color:#fff;background:var(--rust);align-self:flex-start;padding:.15rem .5rem;border-radius:5px;margin-bottom:.5rem}
+  .staycard a{margin-top:.8rem;text-align:center;font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:.06em;font-size:.7rem;font-weight:600;color:#fff;background:var(--sage-deep);padding:.45rem;border-radius:999px;text-decoration:none;transition:.2s}
+  .staycard a:hover{background:var(--night)}
+  .petnote{text-align:center;margin-top:1.3rem;font-size:.92rem;color:#7a5a1e;background:#fdeccf;border:1px solid var(--ochre);border-radius:10px;padding:.7rem 1rem;max-width:640px;margin-left:auto;margin-right:auto}
+
+  section.tips{background:var(--night);color:var(--sand);border-radius:20px;padding:2.4rem 1.6rem;margin-top:3.4rem;scroll-margin-top:80px}
+  section.tips .eyebrow{color:var(--ochre)}
+  section.tips h3{color:var(--cream);font-size:clamp(1.5rem,4vw,2.1rem);font-weight:600;margin:.4rem 0 1.5rem}
+  .tipgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1.1rem}
+  .tip{background:rgba(255,255,255,.05);border:1px solid rgba(216,154,63,.25);border-radius:14px;padding:1.1rem 1.2rem}
+  .tip.hot{border-color:var(--rust);background:rgba(181,72,31,.18)}
+  .tip h4{font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:.1em;font-size:.85rem;color:var(--ochre);margin-bottom:.4rem}
+  .tip p{font-size:.95rem;color:rgba(242,230,206,.85)}
+
+  section.pack{margin-top:3.4rem;text-align:center;scroll-margin-top:80px}
+  section.pack h3{font-size:clamp(1.5rem,4vw,2.1rem);font-weight:600;margin-bottom:.4rem}
+  section.pack p.sub{color:#6b5946;margin-bottom:1.4rem}
+  .progwrap{max-width:420px;margin:0 auto 1.6rem}
+  .progbar{height:10px;background:var(--sand-deep);border-radius:999px;overflow:hidden}
+  .progfill{height:100%;width:0;background:linear-gradient(90deg,var(--sage),var(--ochre));transition:width .4s}
+  .progtxt{font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:.12em;font-size:.72rem;color:var(--sage-deep);margin-top:.5rem}
+  .checklist{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:.6rem;max-width:760px;margin:0 auto;text-align:left}
+  .check{display:flex;align-items:center;gap:.7rem;background:var(--cream);border:1px solid var(--line);border-radius:10px;padding:.65rem .85rem;cursor:pointer;transition:.2s;user-select:none}
+  .check:hover{border-color:var(--rust)}
+  .box{flex:none;width:20px;height:20px;border:2px solid var(--rust);border-radius:5px;display:grid;place-items:center;transition:.2s}
+  .box svg{width:13px;height:13px;opacity:0;transform:scale(.5);transition:.2s;color:var(--cream)}
+  .check.done .box{background:var(--rust)}
+  .check.done .box svg{opacity:1;transform:scale(1)}
+  .check.done .lbl{text-decoration:line-through;color:#a08a6f}
+  .check .lbl{font-size:.95rem}
+
+  footer{text-align:center;padding:3rem 1.2rem 2.5rem;color:#6b5946}
+  footer .big{font-family:'Fraunces',serif;font-weight:900;font-size:1.6rem;color:var(--rust-deep)}
+  footer .sm{font-size:.82rem;margin-top:.4rem}
+
+  @media(max-width:620px){.day-meta{display:none}.stat{padding:.4rem 1rem}.stop{flex-wrap:wrap}.maplink{margin-top:.3rem}#map{height:420px}}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-wrap">
+    <div class="nav-brand">🌵 CATSKILLS <b>→</b> CARLSBAD</div>
+    <div class="nav-links" id="navlinks">
+      <a href="#mapsec">Map</a>
+      <a href="#d1">D1</a><a href="#d2">D2</a><a href="#d3">D3</a><a href="#d4">D4</a><a href="#d5">D5</a>
+      <a href="#stay">Stay</a><a href="#tips">Tips</a><a href="#pack">Pack</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="sun"></div>
+  <div class="hero-inner">
+    <div class="eyebrow">5-Day Drive · Big Views, No Big Hikes</div>
+    <h1>Catskills to Carlsbad</h1>
+    <div class="route">Narrowsburg, <b>NY</b> &nbsp;→&nbsp; Carlsbad, <b>CA</b></div>
+    <div class="datebadge">Mon Jun 29 – Fri Jul 3, 2026</div>
+    <div class="stats">
+      <div class="stat"><span class="num">~2,975</span><span class="lbl">Miles</span></div>
+      <div class="stat"><span class="num">5</span><span class="lbl">Days</span></div>
+      <div class="stat"><span class="num">11</span><span class="lbl">States</span></div>
+      <div class="stat"><span class="num">2</span><span class="lbl">Nat'l Parks</span></div>
+    </div>
+  </div>
+  <svg class="range" viewBox="0 0 1440 210" preserveAspectRatio="none">
+    <path d="M0,145 L160,78 L320,135 L480,58 L640,125 L800,68 L960,130 L1120,72 L1280,135 L1440,92 L1440,210 L0,210 Z" fill="#7C2E18" opacity=".55"/>
+    <path d="M0,172 L200,115 L380,168 L560,105 L740,162 L920,110 L1100,168 L1280,115 L1440,158 L1440,210 L0,210 Z" fill="#B5481F" opacity=".8"/>
+    <path d="M0,198 L240,162 L480,195 L720,158 L960,195 L1200,162 L1440,195 L1440,210 L0,210 Z" fill="#F2E6CE"/>
+  </svg>
+</header>
+
+<main>
+  <div class="intro">
+    <h2>Fast across the flats, big views in the West.</h2>
+    <p>Three steady days to the Rockies, then a drive-up tour of Arches and a night at Zion's gate — all from pullouts and overlooks, no long hikes. Built to land you on the coast for the long weekend.</p>
+    <div class="arrive">🌊 Arrive Carlsbad &nbsp;·&nbsp; Friday, July 3</div>
+  </div>
+
+  <!-- MAP -->
+  <section class="mapsec" id="mapsec">
+    <div class="sechead"><div class="eyebrow" style="color:var(--sage-deep)">The Route</div><h3>Where you'll sleep each night</h3>
+      <p>Tap a day to fly to that leg. Numbered pins are your overnight towns — click one to start an Airbnb search.</p></div>
+    <div class="daychips" id="daychips"></div>
+    <div id="map"></div>
+    <div class="mapnote">Lines are a straight-line schematic — the drive follows I-70 west, then I-15 to the coast. ♨️ pins mark hot springs near your overnight towns.</div>
+  </section>
+
+  <div class="secdivider"><div class="eyebrow">The Itinerary</div><h3>Five days, mile by mile</h3></div>
+  <div class="toolbar"><button class="btn" id="toggleAll">Expand all days</button></div>
+
+  <div class="days" id="days">
+
+    <!-- DAY 1 -->
+    <article class="day open" id="d1"><div class="day-head"><div class="daynum">1</div>
+      <div class="day-titles"><div class="seg">Catskills → Midwest</div><h3>Narrowsburg, NY → Cincinnati, OH</h3><div class="daydate">Mon · June 29</div></div>
+      <div class="day-meta"><div class="mi">~590 mi</div><div class="hr">~9.5 hr</div></div>
+      <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg></div>
+      <div class="day-body"><div class="day-body-inner">
+        <p class="drive">The long first push, through Pennsylvania and across Ohio. A transit day — settle in and roll.</p>
+        <div class="timing"><span class="ico">⏱️</span><div><b>Ideal timing:</b> Out the door by 7 AM, arrive Cincinnati ~6:30 PM. Stretch the dogs at rest areas every couple of hours.</div></div>
+        <div class="block"><div class="block-label">Eat &amp; Stay · Cincinnati, OH</div>
+          <div class="stop food"><div class="dot"></div><div class="txt"><span class="nm">Over-the-Rhine (OTR) dinner</span><div class="ds">Cincinnati's walkable brick district — breweries, patios, easy dog-friendly spots after a long day.</div></div><a class="maplink" target="_blank" href="https://www.google.com/maps/search/?api=1&query=Over-the-Rhine%20Cincinnati%20restaurants">Map it</a></div></div>
+      </div></div>
+    </article>
+
+    <!-- DAY 2 -->
+    <article class="day" id="d2"><div class="day-head"><div class="daynum">2</div>
+      <div class="day-titles"><div class="seg">Across the Heartland</div><h3>Cincinnati, OH → Topeka, KS</h3><div class="daydate">Tue · June 30</div></div>
+      <div class="day-meta"><div class="mi">653 mi</div><div class="hr">~9.5 hr</div></div>
+      <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg></div>
+      <div class="day-body"><div class="day-body-inner">
+        <p class="drive">Indiana, Illinois, Missouri — straight down I-70. One iconic stop breaks it up.</p>
+        <div class="timing"><span class="ico">⏱️</span><div><b>Ideal timing:</b> Depart ~7:30 AM. Gateway Arch around midday, then push to Topeka by ~7 PM.</div></div>
+        <div class="block"><div class="block-label">Stop</div>
+          <div class="stop view"><div class="dot"></div><div class="txt"><span class="nm">Gateway Arch, St. Louis <span class="nohike">No hike</span></span><div class="ds">Right off I-70. Photograph it from the riverfront or the lawn, stretch your legs, roll on — no trail required.</div></div><a class="maplink" target="_blank" href="https://www.google.com/maps/search/?api=1&query=Gateway%20Arch%20St%20Louis">Map it</a></div></div>
+        <div class="block"><div class="block-label">Eat &amp; Stay · Topeka, KS</div>
+          <div class="stop food"><div class="dot"></div><div class="txt"><span class="nm">Pull off near downtown / I-70</span><div class="ds">A practical sleep stop. Grab BBQ, crash early — tomorrow is the big one.</div></div><a class="maplink" target="_blank" href="https://www.google.com/maps/search/?api=1&query=Topeka%20Kansas%20barbecue">Map it</a></div></div>
+      </div></div>
+    </article>
+
+    <!-- DAY 3 -->
+    <article class="day green" id="d3"><div class="day-head"><div class="daynum">3</div>
+      <div class="day-titles"><div class="seg">Plains → Rockies</div><h3>Topeka, KS → Glenwood Springs, CO</h3><div class="daydate">Wed · July 1</div></div>
+      <div class="day-meta"><div class="mi">696 mi</div><div class="hr">~10 hr</div></div>
+      <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg></div>
+      <div class="day-body"><div class="day-body-inner">
+        <p class="drive">The longest day — all of Kansas, then a gorgeous climb into the Colorado Rockies. Pace yourself; the payoff is at the end.</p>
+        <div class="timing"><span class="ico">⏱️</span><div><b>Ideal timing:</b> Early start, ~6:30–7 AM. The Kansas miles go fast; you'll hit the mountains in the afternoon and reach Glenwood by evening.</div></div>
+        <div class="block"><div class="block-label">On the way</div>
+          <div class="stop view"><div class="dot"></div><div class="txt"><span class="nm">I-70 over the Rockies &amp; Glenwood Canyon <span class="nohike">Drive-by</span></span><div class="ds">One of the most scenic interstates in the country — soaring passes and a canyon-hugging highway. All from the driver's seat.</div></div><a class="maplink" target="_blank" href="https://www.google.com/maps/search/?api=1&query=Glenwood%20Canyon%20Colorado%20I-70">Map it</a></div></div>
+        <div class="block"><div class="block-label">♨️ Soak here · Glenwood Springs</div>
+          <div class="stop view"><div class="dot"></div><div class="txt"><span class="nm">Glenwood Hot Springs Pool <span class="nohike">Reserve</span></span><div class="ds">The classic — the world's largest hot springs pool, right in town. Easy and iconic.</div></div><a class="maplink" target="_blank" href="https://www.hotspringspool.com/">Reserve</a></div>
+          <div class="stop view"><div class="dot"></div><div class="txt"><span class="nm">Iron Mountain Hot Springs <span class="nohike">Reserve</span></span><div class="ds">16 landscaped riverside mineral pools, a mile from downtown — the most relaxing option. Book ahead.</div></div><a class="maplink" target="_blank" href="https://www.ironmountainhotsprings.com/">Reserve</a></div>
+          <div class="stop view"><div class="dot"></div><div class="txt"><span class="nm">Penny Hot Springs <span class="nohike">Natural · Free</span></span><div class="ds">Wild rock pools on the Crystal River, ~30 min south. Day-use, clothing-optional. Check river levels in early summer.</div></div><a class="maplink" target="_blank" href="https://www.google.com/maps/search/?api=1&query=Penny%20Hot%20Springs%20Colorado">Map it</a></div>
+          <div class="stop view"><div class="dot"></div><div class="txt"><span class="nm">South Canyon Hot Springs <span class="nohike">Natural · Free</span></span><div class="ds">Primitive pool ~15 min west off I-70 Exit 111, a 2-minute walk in. Rustic and hit-or-miss.</div></div><a class="maplink" target="_blank" href="https://www.google.com/maps/search/?api=1&query=South%20Canyon%20Hot%20Springs%20Glenwood">Map it</a></div>
+          <div class="flag">🐾 Dogs can't go in the pools at the developed springs, so a soak is a "dogs at the Airbnb" treat. The free wild springs (Penny, South Canyon) are open-air if you'd rather keep them leashed nearby.</div></div>
+        <div class="block"><div class="block-label">Stay · Glenwood Springs, CO</div>
+          <div class="stop"><div class="dot"></div><div class="txt"><span class="nm">Overnight in town</span><div class="ds">Riverside mountain town. Books up in summer — reserve early.</div></div><a class="maplink" target="_blank" href="https://www.google.com/maps/search/?api=1&query=Glenwood%20Springs%20Colorado%20downtown">Map it</a></div></div>
+      </div></div>
+    </article>
+
+    <!-- DAY 4 -->
+    <article class="day green" id="d4"><div class="day-head"><div class="daynum">4</div>
+      <div class="day-titles"><div class="seg">Red Rock Day</div><h3>Glenwood Springs → Arches → Zion</h3><div class="daydate">Thu · July 2</div></div>
+      <div class="day-meta"><div class="mi">~565 mi</div><div class="hr">~8.5 hr + park</div></div>
+      <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg></div>
+      <div class="day-body"><div class="day-body-inner">
+        <p class="drive">The scenic centerpiece. Cross into Utah for a drive-up tour of Arches, then on to Zion for the night. The park stop conveniently splits the drive in half.</p>
+        <div class="timing"><span class="ico">⏱️</span><div><b>Ideal timing:</b> Leave Glenwood ~7 AM → Arches ~10:30 AM → ~1.5–2 hrs of viewpoints → arrive Springdale (Zion) ~5:30–6 PM.</div></div>
+        <div class="block"><div class="block-label">Arches — drive-up viewpoints (no hiking)</div>
+          <div class="stop view"><div class="dot"></div><div class="txt"><span class="nm">Park Avenue Viewpoint <span class="nohike">No hike</span></span><div class="ds">Dramatic canyon walls right at the parking lot near the entrance.</div></div><a class="maplink" target="_blank" href="https://www.google.com/maps/search/?api=1&query=Park%20Avenue%20Viewpoint%20Arches">Map it</a></div>
+          <div class="stop view"><div class="dot"></div><div class="txt"><span class="nm">Balanced Rock <span class="nohike">No hike</span></span><div class="ds">Visible straight from the road — pull over and snap it.</div></div><a class="maplink" target="_blank" href="https://www.google.com/maps/search/?api=1&query=Balanced%20Rock%20Arches">Map it</a></div>
+          <div class="stop view"><div class="dot"></div><div class="txt"><span class="nm">The Windows <span class="nohike">No hike</span></span><div class="ds">North &amp; South Window and Turret Arch, all viewable from the lot.</div></div><a class="maplink" target="_blank" href="https://www.google.com/maps/search/?api=1&query=The%20Windows%20Arches%20National%20Park">Map it</a></div>
+          <div class="stop view"><div class="dot"></div><div class="txt"><span class="nm">Delicate Arch Viewpoint (lower) <span class="nohike">No hike</span></span><div class="ds">See the famous arch from a distance — no 3-mile hike needed.</div></div><a class="maplink" target="_blank" href="https://www.google.com/maps/search/?api=1&query=Delicate%20Arch%20Viewpoint%20Arches">Map it</a></div>
+          <div class="stop view"><div class="dot"></div><div class="txt"><span class="nm">Panorama Point <span class="nohike">No hike</span></span><div class="ds">Wide-open pullout panorama over the whole park.</div></div><a class="maplink" target="_blank" href="https://www.google.com/maps/search/?api=1&query=Panorama%20Point%20Arches">Map it</a></div>
+          <div class="flag"><b>Book the timed-entry:</b> Arches runs a seasonal timed-entry reservation in summer — grab a ticket for your ~10:30 AM window at recreation.gov (or enter before the early-morning cutoff without one). <b>It'll be 100°+</b> — keep someone with the dogs at every pullout, never leave them in the car, and mind hot pavement on their paws.</div></div>
+        <div class="block"><div class="block-label">Eat &amp; Stay · Springdale, UT (Zion gate)</div>
+          <div class="stop food"><div class="dot"></div><div class="txt"><span class="nm">Oscar's Cafe</span><div class="ds">Sweet-potato fries + green chili in the walkable village at Zion's entrance.</div></div><a class="maplink" target="_blank" href="https://www.google.com/maps/search/?api=1&query=Oscar%27s%20Cafe%20Springdale%20UT">Map it</a></div></div>
+        <div class="block"><div class="block-label">♨️ Soak here · near Zion</div>
+          <div class="stop view"><div class="dot"></div><div class="txt"><span class="nm">Zion Canyon Hot Springs (La Verkin) <span class="nohike">Reserve</span></span><div class="ds">Newly reopened — 50+ mineral pools fed by the natural Pah Tempe springs, ~30 min from Springdale. A perfect end-of-day unwind after Arches. Book ahead.</div></div><a class="maplink" target="_blank" href="https://www.zioncanyonhotsprings.com/">Reserve</a></div></div>
+      </div></div>
+    </article>
+
+    <!-- DAY 5 -->
+    <article class="day" id="d5"><div class="day-head"><div class="daynum">5</div>
+      <div class="day-titles"><div class="seg">Desert → The Pacific</div><h3>Zion, UT → Carlsbad, CA</h3><div class="daydate">Fri · July 3</div></div>
+      <div class="day-meta"><div class="mi">~470 mi</div><div class="hr">~7 hr</div></div>
+      <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg></div>
+      <div class="day-body"><div class="day-body-inner">
+        <p class="drive">Home stretch. Down I-15 through Las Vegas, then cut west through north county — straight to the Carlsbad coast, skipping LA entirely.</p>
+        <div class="timing"><span class="ico">⏱️</span><div><b>Ideal timing:</b> Leave early, ~7 AM. Vegas lunch ~10:30, then push west of town by midday to stay ahead of holiday-weekend traffic. Arrive Carlsbad ~4–5 PM.</div></div>
+        <div class="block"><div class="block-label">Optional morning &amp; stops</div>
+          <div class="stop view"><div class="dot"></div><div class="txt"><span class="nm">Zion Canyon, quick morning look <span class="nohike">Drive/shuttle</span></span><div class="ds">If you've got an hour, ride the shuttle in for the canyon views before heading out.</div></div><a class="maplink" target="_blank" href="https://www.google.com/maps/search/?api=1&query=Zion%20Canyon%20Scenic%20Drive">Map it</a></div>
+          <div class="stop"><div class="dot"></div><div class="txt"><span class="nm">Las Vegas Strip</span><div class="ds">Lunch + leg-stretch, then ~4 hr to the coast.</div></div><a class="maplink" target="_blank" href="https://www.google.com/maps/search/?api=1&query=Las%20Vegas%20Strip">Map it</a></div>
+          <div class="stop view"><div class="dot"></div><div class="txt"><span class="nm">Carlsbad, CA 🌊</span><div class="ds">The Pacific — and your new home base. ~3,000 miles behind you.</div></div><a class="maplink" target="_blank" href="https://www.google.com/maps/search/?api=1&query=Carlsbad%20California">Map it</a></div></div>
+      </div></div>
+    </article>
+
+  </div>
+
+  <!-- WHERE TO STAY -->
+  <section class="stay" id="stay">
+    <div class="sechead"><div class="eyebrow">Where to Stay</div><h3>Your four Airbnb towns</h3>
+      <p>Book in this priority order — Springdale goes fastest because it's at Zion's gate on a holiday week.</p></div>
+    <div class="staygrid">
+      <div class="staycard"><span class="priority">Book 1st</span><div class="nht">Night 4 · Thu Jul 2</div><h4>Springdale, UT</h4><p>Right at Zion's entrance, walkable to dinner, and the most pet-friendly options — but it sells out first over the holiday. Lock this one now.</p><a target="_blank" href="https://www.airbnb.com/s/Springdale%2C%20UT/homes">🏠 Find Airbnbs</a></div>
+      <div class="staycard"><span class="priority">Book 2nd</span><div class="nht">Night 3 · Wed Jul 1</div><h4>Glenwood Springs, CO</h4><p>Look near downtown or the hot springs. A popular summer mountain town, so book early. River-view spots are a treat.</p><a target="_blank" href="https://www.airbnb.com/s/Glenwood%20Springs%2C%20CO/homes">🏠 Find Airbnbs</a></div>
+      <div class="staycard"><div class="nht">Night 1 · Mon Jun 29</div><h4>Cincinnati, OH</h4><p>Aim for Over-the-Rhine or downtown — walkable and full of food. Easy parking + a fenced yard is a bonus with the dogs.</p><a target="_blank" href="https://www.airbnb.com/s/Cincinnati%2C%20OH/homes">🏠 Find Airbnbs</a></div>
+      <div class="staycard"><div class="nht">Night 2 · Tue Jun 30</div><h4>Topeka, KS</h4><p>Just a sleep stop — anywhere near downtown or I-70 with easy in-and-out and a place to walk the dogs works fine.</p><a target="_blank" href="https://www.airbnb.com/s/Topeka%2C%20KS/homes">🏠 Find Airbnbs</a></div>
+    </div>
+    <div class="petnote">🐾 <b>Two dogs:</b> filter every search for <b>"Pets allowed"</b> and favor places with a yard or ground-floor entry. A few hosts charge a pet fee — worth confirming in the listing before you book.</div>
+  </section>
+
+  <!-- TIPS -->
+  <section class="tips" id="tips">
+    <div class="eyebrow">Know Before You Go</div>
+    <h3>What makes or breaks it</h3>
+    <div class="tipgrid">
+      <div class="tip hot"><h4>🎟️ Arches timed-entry</h4><p>Reserve your Day 4 entry window at recreation.gov as soon as it opens — summer slots go fast.</p></div>
+      <div class="tip hot"><h4>🐾 Dogs + desert heat</h4><p>Day 4–5 hit 100°+. Never leave dogs in the car, watch hot pavement, and pack way more water than feels necessary.</p></div>
+      <div class="tip"><h4>🛏️ Book Springdale first</h4><p>Zion's gateway town sells out earliest over July 4th weekend. It's your #1 reservation.</p></div>
+      <div class="tip"><h4>🚗 Friday-3rd traffic</h4><p>Arriving the 3rd dodges the brutal Sunday return jam — but leave Vegas by midday to stay ahead of outbound holiday traffic.</p></div>
+      <div class="tip"><h4>⛽ Day 3 is the long one</h4><p>Topeka → Glenwood is ~10 hr of wheel time. Fuel up, start early, and split driving if you can.</p></div>
+    </div>
+  </section>
+
+  <!-- PACK -->
+  <section class="pack" id="pack">
+    <h3>Trip checklist</h3>
+    <p class="sub">Tap to check off — tracks your prep right here.</p>
+    <div class="progwrap"><div class="progbar"><div class="progfill" id="progfill"></div></div><div class="progtxt" id="progtxt">0 of 0 done</div></div>
+    <div class="checklist" id="checklist"></div>
+  </section>
+</main>
+
+<footer>
+  <div class="big">See you in Carlsbad. 🌅</div>
+  <div class="sm">Catskills → Pacific · Jun 29 – Jul 3, 2026 · ~2,975 miles · drive-up sights, no big hikes</div>
+</footer>
+
+<script>
+  var START = {nm:"Narrowsburg, NY",lat:41.6017,lng:-75.0568};
+  var COLORS = ["#B5481F","#D9772B","#C9A227","#5E8C4A","#2E6F9E"];
+
+  var SPRINGS = [
+    {nm:"Glenwood Hot Springs Pool",lat:39.5503,lng:-107.3229,t:"Developed · the classic big pool",url:"https://www.hotspringspool.com/"},
+    {nm:"Iron Mountain Hot Springs",lat:39.5519,lng:-107.3289,t:"Developed · riverside mineral pools",url:"https://www.ironmountainhotsprings.com/"},
+    {nm:"Penny Hot Springs",lat:39.3149,lng:-107.2278,t:"Natural · free · on the Crystal River",url:null},
+    {nm:"South Canyon Hot Springs",lat:39.5470,lng:-107.4350,t:"Natural · free · off I-70 Exit 111",url:null},
+    {nm:"Zion Canyon Hot Springs (La Verkin)",lat:37.1995,lng:-113.2710,t:"Developed · Pah Tempe source · ~30 min from Zion",url:"https://www.zioncanyonhotsprings.com/"}
+  ];
+
+  var DAYS = [
+    {n:1,date:"Mon Jun 29",label:"Cincinnati",pts:[
+      {nm:"Narrowsburg, NY",lat:41.6017,lng:-75.0568,type:"start",eb:"Start · Mon Jun 29"},
+      {nm:"Cincinnati, OH",lat:39.1031,lng:-84.5120,type:"night",bnb:"Cincinnati%2C%20OH",ds:"Night 1 — Over-the-Rhine"}]},
+    {n:2,date:"Tue Jun 30",label:"Topeka",pts:[
+      {nm:"Gateway Arch, St. Louis",lat:38.6247,lng:-90.1848,type:"stop",ds:"No-hike photo stop, right off I-70"},
+      {nm:"Topeka, KS",lat:39.0473,lng:-95.6752,type:"night",bnb:"Topeka%2C%20KS",ds:"Night 2 — sleep stop"}]},
+    {n:3,date:"Wed Jul 1",label:"Glenwood Springs",pts:[
+      {nm:"Glenwood Springs, CO",lat:39.5505,lng:-107.3248,type:"night",bnb:"Glenwood%20Springs%2C%20CO",ds:"Night 3 — hot springs soak"}]},
+    {n:4,date:"Thu Jul 2",label:"Springdale (Zion)",pts:[
+      {nm:"Arches National Park",lat:38.7331,lng:-109.5925,type:"stop",ds:"Drive-up viewpoints — no hiking"},
+      {nm:"Springdale, UT",lat:37.1888,lng:-113.0011,type:"night",bnb:"Springdale%2C%20UT",ds:"Night 4 — at Zion's gate (book first!)"}]},
+    {n:5,date:"Fri Jul 3",label:"Carlsbad",pts:[
+      {nm:"Las Vegas Strip",lat:36.1147,lng:-115.1728,type:"stop",ds:"Lunch — then go before traffic builds"},
+      {nm:"Carlsbad, CA",lat:33.1581,lng:-117.3506,type:"end",eb:"Finish · Fri Jul 3",ds:"The Pacific coast — home base"}]}
+  ];
+
+  function buildMap(){
+    if(typeof L==="undefined"){ return setTimeout(buildMap,200); }
+    var map = L.map("map",{scrollWheelZoom:false}).setView([39,-98],4);
+    L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",
+      {attribution:"&copy; OpenStreetMap &copy; CARTO",maxZoom:19,subdomains:"abcd"}).addTo(map);
+
+    var prev = START, allLatLng = [[prev.lat,prev.lng]], dayBounds = {};
+    DAYS.forEach(function(d,i){
+      var color = COLORS[i%COLORS.length];
+      var seq = [[prev.lat,prev.lng]];
+      d.pts.forEach(function(p){ seq.push([p.lat,p.lng]); });
+      L.polyline(seq,{color:color,weight:4,opacity:.85}).addTo(map);
+      dayBounds[d.n] = L.latLngBounds(seq);
+      seq.forEach(function(c){ allLatLng.push(c); });
+      d.pts.forEach(function(p){
+        if(p.type==="night"){
+          var icon = L.divIcon({className:"",iconSize:[30,30],iconAnchor:[15,28],html:'<div class="numpin" style="background:'+color+'"><span>'+d.n+'</span></div>'});
+          L.marker([p.lat,p.lng],{icon:icon}).addTo(map).bindPopup(
+            '<div class="pop-eyebrow" style="color:'+color+'">Night '+d.n+' · '+d.date+'</div><div class="pop-nm">'+p.nm+'</div>'+(p.ds?'<div class="pop-ds">'+p.ds+'</div>':'')+
+            '<a class="pop-bnb" target="_blank" href="https://www.airbnb.com/s/'+p.bnb+'/homes">🏠 Find Airbnbs here</a>');
+        } else if(p.type==="start"||p.type==="end"){
+          var col = p.type==="start"?"#3F5238":"#7C2E18", em = p.type==="start"?"🚐":"🌊";
+          var i2 = L.divIcon({className:"",iconSize:[30,30],iconAnchor:[15,28],html:'<div class="numpin" style="background:'+col+';font-size:.85rem"><span>'+em+'</span></div>'});
+          L.marker([p.lat,p.lng],{icon:i2}).addTo(map).bindPopup('<div class="pop-eyebrow" style="color:'+col+'">'+p.eb+'</div><div class="pop-nm">'+p.nm+'</div>'+(p.ds?'<div class="pop-ds">'+p.ds+'</div>':''));
+        } else {
+          L.circleMarker([p.lat,p.lng],{radius:6,color:"#fff",weight:2,fillColor:color,fillOpacity:1}).addTo(map)
+            .bindPopup('<div class="pop-eyebrow" style="color:'+color+'">Day '+d.n+' stop</div><div class="pop-nm">'+p.nm+'</div>'+(p.ds?'<div class="pop-ds">'+p.ds+'</div>':''));
+        }
+      });
+      prev = d.pts[d.pts.length-1];
+    });
+
+    SPRINGS.forEach(function(s){
+      var icon = L.divIcon({className:"",iconSize:[26,26],iconAnchor:[13,13],html:'<div class="springpin">♨️</div>'});
+      var link = s.url
+        ? '<a class="pop-bnb" style="background:#2E8B7F" target="_blank" href="'+s.url+'">Reserve / Info</a>'
+        : '<a class="pop-bnb" style="background:#2E8B7F" target="_blank" href="https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(s.nm)+'">Get directions</a>';
+      L.marker([s.lat,s.lng],{icon:icon}).addTo(map).bindPopup(
+        '<div class="pop-eyebrow" style="color:#2E8B7F">♨️ Hot Spring</div><div class="pop-nm">'+s.nm+'</div><div class="pop-ds">'+s.t+'</div>'+link);
+    });
+
+    var full = L.latLngBounds(allLatLng);
+    map.fitBounds(full,{padding:[40,40]});
+    setTimeout(function(){ map.invalidateSize(); map.fitBounds(full,{padding:[40,40]}); },300);
+
+    var wrap = document.getElementById("daychips");
+    var all = document.createElement("button"); all.className="chip all"; all.textContent="★ Whole route";
+    all.addEventListener("click", function(){ map.fitBounds(full,{padding:[40,40]}); });
+    wrap.appendChild(all);
+    DAYS.forEach(function(d,i){
+      var c=document.createElement("button"); c.className="chip"; c.style.background=COLORS[i%COLORS.length];
+      c.textContent="Day "+d.n+" · "+d.label;
+      c.addEventListener("click", function(){
+        if(dayBounds[d.n]) map.flyToBounds(dayBounds[d.n],{padding:[60,60],maxZoom:9,duration:.8});
+        wrap.scrollIntoView({behavior:"smooth",block:"start"});
+      });
+      wrap.appendChild(c);
+    });
+  }
+  buildMap();
+
+  var days = Array.prototype.slice.call(document.querySelectorAll(".day"));
+  days.forEach(function(d){ d.querySelector(".day-head").addEventListener("click", function(){ d.classList.toggle("open"); }); });
+  var tg = document.getElementById("toggleAll");
+  tg.addEventListener("click", function(){
+    var anyClosed = days.some(function(d){ return !d.classList.contains("open"); });
+    days.forEach(function(d){ d.classList.toggle("open", anyClosed); });
+    tg.textContent = anyClosed ? "Collapse all days" : "Expand all days";
+  });
+
+  var links = Array.prototype.slice.call(document.querySelectorAll("#navlinks a"));
+  var sections = links.map(function(l){ return document.querySelector(l.getAttribute("href")); });
+  function spy(){ var pos=window.scrollY+130, idx=0; sections.forEach(function(s,i){ if(s&&s.offsetTop<=pos) idx=i; }); links.forEach(function(l,i){ l.classList.toggle("active", i===idx); }); }
+  window.addEventListener("scroll", spy); spy();
+
+  var items = ["Springdale Airbnb booked (1st!)","Other 3 Airbnbs booked","Arches timed-entry reserved","Hot springs reserved (Glenwood/Zion)","Pet-friendly confirmed + fees",
+    "Water bottles (people + dogs)","Dog bowls, leashes, waste bags","Sunscreen + hats","Cooler for snacks","Phone mount + chargers",
+    "Offline maps downloaded","Swimsuits (hot springs!)","Layers (cool mountains, hot desert)","Camera","Road playlist / audiobooks",
+    "Car checked (oil, tires, AC)","Dog meds / vaccination records"];
+  var cl=document.getElementById("checklist"), fill=document.getElementById("progfill"), txt=document.getElementById("progtxt");
+  function upd(){ var done=cl.querySelectorAll(".check.done").length; fill.style.width=(done/items.length*100)+"%"; txt.textContent=done+" of "+items.length+" done"; }
+  items.forEach(function(it){
+    var lab=document.createElement("label"); lab.className="check";
+    lab.innerHTML='<span class="box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5"><path d="M5 13l4 4L19 7"/></svg></span><span class="lbl"></span>';
+    lab.querySelector(".lbl").textContent=it;
+    lab.addEventListener("click", function(){ lab.classList.toggle("done"); upd(); });
+    cl.appendChild(lab);
+  });
+  upd();
+</script>
+</body>
+</html>
